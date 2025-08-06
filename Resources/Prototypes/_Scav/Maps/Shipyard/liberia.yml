@@ -1,0 +1,36 @@
+- type: vessel
+  id: Libera
+  parent: BaseVessel
+  name: IMS Liberia
+  description: Large merchant vessel suited for long-range cargo hauling and deep space living.
+  price: 150000
+  category: Large
+  group: Shipyard
+  shuttlePath: /Maps/_Scav/Shuttles/liberia.yml
+  guidebookPage: Null
+  class:
+  - Cargo
+  - Capital
+  - Civilian
+  engine:
+  - AME
+
+- type: gameMap
+  id: Liberia
+  mapName: 'IMS Liberia'
+  mapPath: /Maps/_Scav/Shuttles/liberia.yml
+  minPlayers: 0
+  stations:
+    Liberia:
+      stationProto: StandardFrontierExpeditionVessel
+      components:
+        - type: StationNameSetup
+          mapNameTemplate: 'Liberia {1}'
+          nameGenerator:
+            !type:NanotrasenNameGenerator
+            prefixCreator: '14'
+        - type: StationJobs
+          availableJobs:
+            ContractorInterview: [ 0, 0 ]
+            PilotInterview: [ 0, 0 ]
+            MercenaryInterview: [ 0, 0 ]
