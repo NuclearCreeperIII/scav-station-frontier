@@ -6,19 +6,17 @@
   ruleEntry: true
   children:
     - ScavstationRuleZeroTolerance
-    - FrontierRule1
-    - FrontierRule2
+    - ScavstationRule1
+    - ScavstationRule2
     - ScavstationRule3
-    - FrontierRule4
+    - ScavstationRule4
     - ScavstationRule5
-    - FrontierRule6
+    - ScavstationRule6
     - ScavstationRule7
-    - FrontierRule8
-    - FrontierRule9
-    - FrontierRule10
-    - FrontierRule11
-    - FrontierRule12
-    - FrontierRule13
+    - ScavstationRule8
+    - ScavstationRule9
+    - ScavstationRule10
+    - ScavstationRule11
 
 - type: guideEntry
   id: ScavstationRuleZeroTolerance
@@ -59,47 +57,35 @@
 - type: guideEntry
   id: ScavstationRule6
   name: guide-entry-scavstation-rule-6
-  text: "/ServerInfo/_Scav/Guidebook/Rules/6_Safezone.xml"
+  text: "/ServerInfo/_Scav/Guidebook/Rules/6_POIs.xml"
   ruleEntry: true
 
 - type: guideEntry
   id: ScavstationRule7
   name: guide-entry-scavstation-rule-7
-  text: "/ServerInfo/_Scav/Guidebook/Rules/7_Antag.xml"
+  text: "/ServerInfo/_Scav/Guidebook/Rules/7_Ghosts.xml"
   ruleEntry: true
 
 - type: guideEntry
   id: ScavstationRule8
   name: guide-entry-scavstation-rule-8
-  text: "/ServerInfo/_Scav/Guidebook/Rules/8_PVP.xml"
+  text: "/ServerInfo/_Scav/Guidebook/Rules/8_Crimes.xml"
   ruleEntry: true
 
 - type: guideEntry
   id: ScavstationRule9
   name: guide-entry-scavstation-rule-9
-  text: "/ServerInfo/_Scav/Guidebook/Rules/9_Pirates.xml"
+  text: "/ServerInfo/_Scav/Guidebook/Rules/9_Silicons.xml"
   ruleEntry: true
 
 - type: guideEntry
   id: ScavstationRule10
   name: guide-entry-scavstation-rule-10
-  text: "/ServerInfo/_Scav/Guidebook/Rules/10_Crimes.xml"
+  text: "/ServerInfo/_Scav/Guidebook/Rules/10_Security.xml"
   ruleEntry: true
 
 - type: guideEntry
   id: ScavstationRule11
   name: guide-entry-scavstation-rule-11
-  text: "/ServerInfo/_Scav/Guidebook/Rules/11_Silicons.xml"
-  ruleEntry: true
-
-- type: guideEntry
-  id: ScavstationRule12
-  name: guide-entry-scavstation-rule-12
-  text: "/ServerInfo/_Scav/Guidebook/Rules/12_Security.xml"
-  ruleEntry: true
-
-- type: guideEntry
-  id: ScavstationRule13
-  name: guide-entry-scavstation-rule-13
-  text: "/ServerInfo/_Scav/Guidebook/Rules/13_Command.xml"
+  text: "/ServerInfo/_Scav/Guidebook/Rules/11_Command.xml"
   ruleEntry: true
