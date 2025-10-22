@@ -17,13 +17,13 @@
   - type: EncryptionKeyHolder
     keySlots: 10 # Frontier 4<10
   - type: Sprite
-    state: icon
+    sprite: Clothing/Ears/Headsets/headset.rsi
   - type: Item
     size: Small
   - type: Clothing
     slots:
     - ears
-    sprite: Clothing/Ears/Headsets/base.rsi
+    sprite: Clothing/Ears/Headsets/headset.rsi
   - type: GuideHelp
     guides:
     - Radio
@@ -34,7 +34,23 @@
   name: passenger headset
   components:
   - type: Sprite
-    sprite: Clothing/Ears/Headsets/base.rsi
+    layers:
+    - state: icon-base
+    - state: icon-primary
+      color: "#9f9f9f"
+    - state: icon-unshaded
+      color: "#c6fafb"
+      shader: unshaded
+  - type: Clothing
+    clothingVisuals:
+      ears:
+        - state: equipped-EARS-base
+          color: "#898989"
+        - state: equipped-EARS-secondary
+          color: "#b0b0b0"
+        - state: equipped-EARS-unshaded
+          color: "#94bfb6"
+          shader: unshaded
 
 - type: entity
   parent: ClothingHeadset
@@ -49,9 +65,21 @@
       - EncryptionKeyCommon
       - EncryptionKeyPublic # Scav
   - type: Sprite
-    sprite: Clothing/Ears/Headsets/cargo.rsi
+    layers:
+    - state: icon-base
+    - state: icon-primary
+      color: "#ccaa77"
+    - state: icon-unshaded
+      color: "#545454"
   - type: Clothing
-    sprite: Clothing/Ears/Headsets/cargo.rsi
+    clothingVisuals:
+      ears:
+        - state: equipped-EARS-base
+          color: "#ccaa77"
+        - state: equipped-EARS-secondary
+          color: "#ccaa77"
+        - state: icon-equipped-EARS-unshaded
+          color: "#545454"
 
 - type: entity
   parent: ClothingHeadsetCargo
