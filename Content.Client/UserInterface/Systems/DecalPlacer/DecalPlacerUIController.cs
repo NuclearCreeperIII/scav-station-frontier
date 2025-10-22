@@ -13,8 +13,9 @@ namespace Content.Client.UserInterface.Systems.DecalPlacer;
 public sealed class DecalPlacerUIController : UIController, IOnStateExited<GameplayState>, IOnSystemChanged<SandboxSystem>
 {
     [Dependency] private readonly IPrototypeManager _prototypes = default!;
+    [Dependency] private readonly IEntityManager _e = default!;
     [UISystemDependency] private readonly SandboxSystem _sandbox = default!;
-
+    private readonly DecalPlacementSystem _decalPlacementSystem = _e.System<DecalPlacementSystem>();
     private DecalPlacerWindow? _window;
 
     public void ToggleWindow()
@@ -25,10 +26,17 @@ public sealed class DecalPlacerUIController : UIController, IOnStateExited<Gamep
         {
             _window.Close();
         }
-        else if(_sandbox.SandboxAllowed)
+        else if (_sandbox.SandboxAllowed)
         {
             _window.Open();
         }
+    }
+
+    public void OnStateEntered()
+    {
+        CommandBinds.Builder
+            .Bind(EngineKeyFunctions.EditorCancelPlace, new PointerInputCmdHandler(OpenDecalViewer))
+            .Register<DecalPlacementSystem>();
     }
 
     public void OnStateExited(GameplayState state)
@@ -37,6 +45,8 @@ public sealed class DecalPlacerUIController : UIController, IOnStateExited<Gamep
             return;
         _window.Dispose();
         _window = null;
+
+        CommandBinds.Unregister<DecalPlacementSystem>();
     }
 
     public void OnSystemLoaded(SandboxSystem system)
@@ -81,5 +91,10 @@ public sealed class DecalPlacerUIController : UIController, IOnStateExited<Gamep
             return;
 
         _window.Close();
+    }
+
+    private void OpenDecalViewer(ICommonSession? session, EntityCoordinates coords, EntityUid uid)
+    {
+
     }
 }

@@ -3,6 +3,7 @@ using Content.Client.Actions;
 using Content.Client.Decals.Overlays;
 using Content.Shared.Actions;
 using Content.Shared.Decals;
+using Content.Shared.Input;
 using Robust.Client.GameObjects;
 using Robust.Client.Graphics;
 using Robust.Client.Input;
@@ -34,6 +35,7 @@ public sealed class DecalPlacementSystem : EntitySystem
     private bool _active;
     private bool _placing;
     private bool _erasing;
+    private bool _viewing;
 
     public (DecalPrototype? Decal, bool Snap, Angle Angle, Color Color) GetActiveDecal()
     {
@@ -58,8 +60,8 @@ public sealed class DecalPlacementSystem : EntitySystem
                 if (_snap)
                 {
                     var newPos = new Vector2(
-                        (float) (MathF.Round(coords.X - 0.5f, MidpointRounding.AwayFromZero) + 0.5),
-                        (float) (MathF.Round(coords.Y - 0.5f, MidpointRounding.AwayFromZero) + 0.5)
+                        (float)(MathF.Round(coords.X - 0.5f, MidpointRounding.AwayFromZero) + 0.5),
+                        (float)(MathF.Round(coords.Y - 0.5f, MidpointRounding.AwayFromZero) + 0.5)
                     );
                     coords = coords.WithPosition(newPos);
                 }
@@ -82,6 +84,7 @@ public sealed class DecalPlacementSystem : EntitySystem
                 _placing = false;
                 return true;
             }, true))
+            /*
             .Bind(EngineKeyFunctions.EditorCancelPlace, new PointerStateInputCmdHandler(
             (session, coords, uid) =>
             {
@@ -100,7 +103,28 @@ public sealed class DecalPlacementSystem : EntitySystem
                 _erasing = false;
 
                 return true;
-            }, true)).Register<DecalPlacementSystem>();
+            }, true))
+            .Bind(ContentKeyFunctions.EditorCopyObject, new PointerStateInputCmdHandler(
+            (session, coords, uid) =>
+            {
+                if (!_active || _viewing)
+                    return false;
+
+                _viewing = true;
+
+                //get a list of decals on the tile, this is easy as decalsystem has helper functions to do that
+                //open a ui panel. I dont know if entitysystems can do that or what
+
+                return true;
+            }, (session, coords, uid) =>
+            {
+                if (!_active)
+                    return false;
+                _viewing = false;
+
+                return true;
+            }, true))*/
+            .Register<DecalPlacementSystem>();
 
         SubscribeLocalEvent<FillActionSlotEvent>(OnFillSlot);
         SubscribeLocalEvent<PlaceDecalActionEvent>(OnPlaceDecalAction);
