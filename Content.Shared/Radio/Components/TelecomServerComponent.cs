@@ -10,9 +10,16 @@ namespace Content.Shared.Radio.Components;
 public sealed partial class TelecomServerComponent : Component
 {
     /// <summary>
-    ///     Range of the server.
+    ///     Absolute maximum range of the server.
     /// </summary>
     [ViewVariables(VVAccess.ReadWrite)]
-    [DataField("range")]
-    public float range = 100;
+    [DataField("outerRange")]
+    public float outerRange = 100;
+
+    /// <summary>
+    ///     Range of the server before signal degradation starts.
+    /// </summary>
+    [ViewVariables(VVAccess.ReadWrite)]
+    [DataField("innerRange")]
+    public float innerRange = 50; //this CANNOT be equal to outer range or there will be a divide by zero error
 }

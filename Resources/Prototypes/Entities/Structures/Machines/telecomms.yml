@@ -64,7 +64,12 @@
     keysExtractionMethod: Prying
     keySlots: 10
   - type: TelecomServer
+<<<<<<< Updated upstream
     range: 256
+=======
+    outerRange: 30
+    innerRange: 15
+>>>>>>> Stashed changes
   - type: ContainerContainer
     containers:
       key_slots: !type:Container

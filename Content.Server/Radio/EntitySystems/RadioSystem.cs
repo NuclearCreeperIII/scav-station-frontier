@@ -93,7 +93,8 @@ public sealed class RadioSystem : EntitySystem
     public void SendRadioMessage(EntityUid messageSource, string message, RadioChannelPrototype channel, EntityUid radioSource, int? frequency = null, bool escapeMarkup = true) // Nuclear-14: add frequency
     {
         // TODO if radios ever garble / modify messages, feedback-prevention needs to be handled better than this.
-        if (!_messages.Add(message))
+        var messageOriginal = message; // Scav: attempted the fix mentioned above
+        if (!_messages.Add(messageOriginal))
             return;
 
         var evt = new TransformSpeakerNameEvent(messageSource, MetaData(messageSource).EntityName);
@@ -135,16 +136,6 @@ public sealed class RadioSystem : EntitySystem
             ("channel", channelText), // Frontier: $"\\[{channel.LocalizedName}\\]"<channelText
             ("name", name),
             ("message", content));
-
-        // most radios are relayed to chat, so lets parse the chat message beforehand
-        var chat = new ChatMessage(
-            ChatChannel.Radio,
-            message,
-            wrappedMessage,
-            NetEntity.Invalid,
-            null);
-        var chatMsg = new MsgChatMessage { Message = chat };
-        var ev = new RadioReceiveEvent(message, messageSource, channel, radioSource, chatMsg);
 
         var sendAttemptEv = new RadioSendAttemptEvent(channel, radioSource);
         RaiseLocalEvent(ref sendAttemptEv);
@@ -190,6 +181,7 @@ public sealed class RadioSystem : EntitySystem
                 if (!sourceServerExempt && sourceActiveServers.Count == 0) //shouldnt this go before the reciever loop
                     continue;
 
+<<<<<<< Updated upstream
                 var recieverServerExempt = _exemptQuery.HasComp(receiver);
                 var recieverActiveServers = GetActiveServers(transform, channel.ID, channel.Range == ChannelRange.LongRange);
 
@@ -197,6 +189,18 @@ public sealed class RadioSystem : EntitySystem
                     continue;
             }
             // End Scav
+=======
+            var recieverNeedServer = !channel.LongRange && !_exemptQuery.HasComp(receiver);
+
+            var recieverSignalDegradation = GetLowestDegradation(sourceActiveServers, transform, sourceTransform); //Of all the servers available to both sender and reciever, get the lowest possible signal degradation
+
+            if (recieverNeedServer && recieverSignalDegradation == 1)
+                continue;
+>>>>>>> Stashed changes
+
+            //message = ApplyMessageDegradation(message, recieverSignalDegradation);
+            message += recieverSignalDegradation.ToString();
+            message += "demo";
 
             // check if message can be sent to specific receiver
             var attemptEv = new RadioReceiveAttemptEvent(channel, radioSource, receiver);
@@ -204,6 +208,17 @@ public sealed class RadioSystem : EntitySystem
             RaiseLocalEvent(receiver, ref attemptEv);
             if (attemptEv.Cancelled)
                 continue;
+
+
+            // Scav: the chat message generation needs to happen here because of degradation
+            var chat = new ChatMessage(
+                ChatChannel.Radio,
+                message,
+                wrappedMessage,
+                NetEntity.Invalid,
+                null);
+            var chatMsg = new MsgChatMessage { Message = chat };
+            var ev = new RadioReceiveEvent(message, messageSource, channel, radioSource, chatMsg);
 
             // send the message
             RaiseLocalEvent(receiver, ref ev);
@@ -214,8 +229,15 @@ public sealed class RadioSystem : EntitySystem
         else
             _adminLogger.Add(LogType.Chat, LogImpact.Low, $"Radio message from {ToPrettyString(messageSource):user} on {channel.LocalizedName}: {message}");
 
-        _replay.RecordServerMessage(chat);
-        _messages.Remove(message);
+        // most radios are relayed to chat, so lets parse the chat message beforehand
+        var chatUndoctored = new ChatMessage(
+            ChatChannel.Radio,
+            messageOriginal,
+            wrappedMessage,
+            NetEntity.Invalid,
+            null);
+        _replay.RecordServerMessage(chatUndoctored);
+        _messages.Remove(messageOriginal);
     }
 
     /// <inheritdoc cref="TelecomServerComponent"/>
@@ -241,7 +263,7 @@ public sealed class RadioSystem : EntitySystem
         foreach (var (server, keys, power, serverTransform) in servers)
         {
             if (serverTransform.MapID == radioTransform.MapID &&
-                (_transform.GetMapCoordinates(radioTransform).Position - _transform.GetMapCoordinates(serverTransform).Position).Length() <= server.range &&
+                (_transform.GetMapCoordinates(radioTransform).Position - _transform.GetMapCoordinates(serverTransform).Position).Length() <= server.outerRange &&
                 power.Powered &&
                 keys.Channels.Contains(channelId))
             {
@@ -251,24 +273,77 @@ public sealed class RadioSystem : EntitySystem
         return false;
     }
 
+<<<<<<< Updated upstream
     private List<EntityUid> GetActiveServers(TransformComponent radioTransform, string channelId, bool longRange = false) //may want to make this a list of <telecomservercomponent, transformcomponent> instead of uid. we dont actually need the uids if we dont call this for both sender and reciever and just iterate over what the sender found
+=======
+    private List<(TelecomServerComponent, TransformComponent)> GetActiveServers(TransformComponent radioTransform, string channelId)
+>>>>>>> Stashed changes
     {
-        var serverQuery = EntityQueryEnumerator<TelecomServerComponent, EncryptionKeyHolderComponent, ApcPowerReceiverComponent, TransformComponent>();
+        List<(TelecomServerComponent, TransformComponent)> activeServers = new List<(TelecomServerComponent, TransformComponent)>();
 
-        List<EntityUid> activeServers = new List<EntityUid>();
-
-        while (serverQuery.MoveNext(out var uid, out var server, out var keys, out var power, out var serverTransform))
+        var servers = EntityQuery<TelecomServerComponent, EncryptionKeyHolderComponent, ApcPowerReceiverComponent, TransformComponent>();
+        foreach (var (server, keys, power, serverTransform) in servers)
         {
             if (serverTransform.MapID == radioTransform.MapID &&
+<<<<<<< Updated upstream
                 (longRange || (_transform.GetMapCoordinates(radioTransform).Position - _transform.GetMapCoordinates(serverTransform).Position).Length() <= server.range) &&
+=======
+                (_transform.GetMapCoordinates(radioTransform).Position - _transform.GetMapCoordinates(serverTransform).Position).Length() <= server.outerRange &&
+>>>>>>> Stashed changes
                 power.Powered &&
                 keys.Channels.Contains(channelId))
             {
-                activeServers.Add(uid);
+                activeServers.Add((server, serverTransform));
+            }
+        }
+        return activeServers;
+    }
+
+    private float GetLowestDegradation(List<(TelecomServerComponent, TransformComponent)> filterList, TransformComponent recieverTransform, TransformComponent senderTransform)
+    {
+        List<(TelecomServerComponent, TransformComponent)> activeServers = new List<(TelecomServerComponent, TransformComponent)>();
+
+        float lowestDegradation = 1; //1 is full degradation, we will assume this unless otherwise noted
+
+        float degradation = 0;
+
+        float recieverDistance;
+        float senderDistance;
+
+        foreach (var (server, serverTransform) in filterList)
+        {
+            recieverDistance = (_transform.GetMapCoordinates(recieverTransform).Position - _transform.GetMapCoordinates(serverTransform).Position).Length();
+            if (recieverDistance <= server.outerRange) //We only care about servers shared by both sender and reciever, others will send no signal at all
+            {
+                senderDistance = (_transform.GetMapCoordinates(senderTransform).Position - _transform.GetMapCoordinates(serverTransform).Position).Length();
+
+                degradation = (Math.Clamp((recieverDistance - server.innerRange) / (server.outerRange - server.innerRange), 0, 1)
+                               + Math.Clamp((senderDistance - server.innerRange) / (server.outerRange - server.innerRange), 0, 1)
+                               / 2); //we want a range from 0 to 1 but it should take both distances into account.
+
+                if (degradation < lowestDegradation)
+                {
+                    lowestDegradation = degradation;
+                }
             }
         }
 
-        return activeServers;
+        return lowestDegradation;
+    }
+
+    private string ApplyMessageDegradation(string message, float degradation)
+    {
+        char[] messageArray = message.ToCharArray();
+        Random rand = new Random();
+        for (int i = 0; i < messageArray.Length; i++)
+        {
+            if (rand.Next(0, 10) < degradation * 10)
+            {
+                messageArray[i] = '-';
+            }
+        }
+
+        return new string(messageArray);
     }
     // End Scav
 }
